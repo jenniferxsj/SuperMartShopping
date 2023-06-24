@@ -1,9 +1,9 @@
 package com.example.superdupermart.controller;
 
-import com.bfs.hibernateprojectdemo.domain.Question;
-import com.bfs.hibernateprojectdemo.dto.common.DataResponse;
-import com.bfs.hibernateprojectdemo.dto.question.QuestionCreationRequest;
-import com.bfs.hibernateprojectdemo.service.QuestionService;
+import com.example.superdupermart.domain.Question;
+import com.example.superdupermart.dto.common.DataResponse;
+import com.example.superdupermart.dto.question.QuestionCreationRequest;
+import com.example.superdupermart.service.QuestionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;

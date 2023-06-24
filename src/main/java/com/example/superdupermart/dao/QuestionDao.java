@@ -1,6 +1,6 @@
 package com.example.superdupermart.dao;
 
-import com.bfs.hibernateprojectdemo.domain.Question;
+import com.example.superdupermart.domain.Question;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

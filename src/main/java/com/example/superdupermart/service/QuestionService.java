@@ -1,7 +1,6 @@
 package com.example.superdupermart.service;
-
-import com.bfs.hibernateprojectdemo.dao.QuestionDao;
-import com.bfs.hibernateprojectdemo.domain.Question;
+import com.example.superdupermart.dao.QuestionDao;
+import com.example.superdupermart.domain.Question;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

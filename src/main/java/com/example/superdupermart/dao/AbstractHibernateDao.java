@@ -37,4 +37,5 @@ public abstract class AbstractHibernateDao<T> {
     protected Session getCurrentSession() {
         return sessionFactory.getCurrentSession();
     }
+
 }
