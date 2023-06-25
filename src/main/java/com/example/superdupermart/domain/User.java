@@ -5,6 +5,8 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity //want to map it to the database table
 @Table(name="user")
@@ -30,9 +32,17 @@ public class User {
     private String passwordHash;
 
     @Column(name = "role")
-    private int role;
+    private Integer role;
 
     @Column(name = "username", nullable = false, length = 30, unique = true)
     @NotEmpty(message = "Please provide your User Name")
     private String username;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Order> orders = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private List<Watchlist> watchlistList = new ArrayList<>();
 }

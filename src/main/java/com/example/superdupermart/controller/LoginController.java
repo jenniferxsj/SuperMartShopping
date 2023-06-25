@@ -1,7 +1,12 @@
 package com.example.superdupermart.controller;
 
+import com.example.superdupermart.domain.User;
+import com.example.superdupermart.dto.common.MessageResponse;
+import com.example.superdupermart.dto.common.ServiceStatus;
 import com.example.superdupermart.dto.login.LoginRequest;
 import com.example.superdupermart.dto.login.LoginResponse;
+import com.example.superdupermart.dto.user.UserCreationRequest;
+import com.example.superdupermart.exception.NoSuchUserExistsException;
 import com.example.superdupermart.security.AuthUserDetail;
 import com.example.superdupermart.security.JwtProvider;
 import com.example.superdupermart.service.UserService;
@@ -31,7 +36,6 @@ public class LoginController {
     //User trying to log in with username and password
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request){
-
         Authentication authentication;
         //Try to authenticate the user using the username and password
         try{
@@ -53,5 +57,14 @@ public class LoginController {
                 .message("Welcome " + authUserDetail.getUsername())
                 .token(token)
                 .build();
+    }
+
+    @PostMapping("/signup")
+    public MessageResponse createUser(@RequestBody UserCreationRequest request) {
+        userService.addUser(request);
+        return MessageResponse.builder()
+                .serviceStatus(
+                        ServiceStatus.builder().success(true).build()
+                ).message("New User Created").build();
     }
 }

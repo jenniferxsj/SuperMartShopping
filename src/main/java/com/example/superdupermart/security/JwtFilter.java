@@ -11,6 +11,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 //The jwt filter that we want to add to the chain of filters of Spring Security
@@ -43,7 +45,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        System.out.println(request.getRequestURI());
-        return request.getRequestURI().equals("login");
+        String path = request.getServletPath();
+        System.out.println("in filter: " + path);
+        List<String> allowLists = new ArrayList<>();
+        allowLists.add("/login");
+        allowLists.add("/signup");
+        return allowLists.stream().anyMatch(a -> a.equals(path));
     }
 }
