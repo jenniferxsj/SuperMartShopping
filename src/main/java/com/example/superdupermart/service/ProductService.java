@@ -31,6 +31,9 @@ public class ProductService {
     }
 
     public Product getProductById(int id) {
-        return productDao.getProductById(id);
+        Product product = productDao.getProductById(id);
+        product.setQuantity(-1);
+        product.setWholesale_price(Integer.MAX_VALUE);
+        return product;
     }
 }
