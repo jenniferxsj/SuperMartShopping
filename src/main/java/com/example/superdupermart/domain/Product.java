@@ -35,7 +35,7 @@ public class Product {
     @Column(name = "wholesale_price")
     private double wholesale_price;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
     @ToString.Exclude
     private List<Watchlist> watchlistList = new ArrayList<>();
 }

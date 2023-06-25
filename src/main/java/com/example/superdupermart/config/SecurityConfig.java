@@ -50,8 +50,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers("/user/*", "/login", "/signup").permitAll()
-                .antMatchers("/admin/**").hasAuthority("ADMIN")
+                .antMatchers("/user/*", "/login", "/signup", "/**").permitAll()
+                //.antMatchers("/products/**").hasAuthority("USER")
                 .anyRequest()
                 .authenticated();
     }
