@@ -6,6 +6,7 @@ import com.example.superdupermart.dto.common.ServiceStatus;
 import com.example.superdupermart.dto.login.LoginRequest;
 import com.example.superdupermart.dto.login.LoginResponse;
 import com.example.superdupermart.dto.user.UserCreationRequest;
+import com.example.superdupermart.exception.InvalidCredentialsException;
 import com.example.superdupermart.exception.NoSuchUserExistsException;
 import com.example.superdupermart.security.AuthUserDetail;
 import com.example.superdupermart.security.JwtProvider;
@@ -43,7 +44,7 @@ public class LoginController {
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
         } catch (AuthenticationException e){
-            throw new BadCredentialsException("Provided credential is invalid.");
+            throw new InvalidCredentialsException("Incorrect credentials, please try again.");
         }
 
         //Successfully authenticated user will be stored in the authUserDetail object

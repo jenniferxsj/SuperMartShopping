@@ -1,6 +1,7 @@
 package com.example.superdupermart.config;
 
 import com.example.superdupermart.dto.common.ErrorResponse;
+import com.example.superdupermart.exception.InvalidCredentialsException;
 import com.example.superdupermart.exception.NoSuchUserExistsException;
 import com.example.superdupermart.exception.UserAlreadyExistException;
 import org.springframework.http.HttpStatus;
@@ -24,8 +25,8 @@ public class GlobalExceptionHandler {
                 .message(ex.getMessage()).build(), HttpStatus.OK);
     }
 
-    @ExceptionHandler(value = {BadCredentialsException.class})
-    public ResponseEntity<ErrorResponse> badCredentialsException(BadCredentialsException ex) {
+    @ExceptionHandler(value = {InvalidCredentialsException.class})
+    public ResponseEntity<ErrorResponse> invalidCredentialsException(InvalidCredentialsException ex) {
         return new ResponseEntity<>(ErrorResponse.builder().statusCode(HttpStatus.UNAUTHORIZED.value())
                 .message(ex.getMessage()).build(), HttpStatus.OK);
     }
