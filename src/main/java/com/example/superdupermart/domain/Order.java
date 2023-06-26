@@ -1,5 +1,6 @@
 package com.example.superdupermart.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -27,10 +28,12 @@ public class Order {
     @Column(name = "order_status")
     private String order_status;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false) //name should be the same with the column in database table
     private User user;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> orderItemList = new ArrayList<>();
 

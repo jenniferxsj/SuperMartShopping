@@ -37,7 +37,7 @@ public class OrderService {
 
     public void placeOrder(User user, CreateOrderRequest createOrderRequest) {
         // check where there is incomplete order. If yes, use that; otherwise, create a new one
-        Optional<Order> orderExist = findUserProcessingOrder(user.getId());
+        Optional<Order> orderExist = findUserProcessingOrder(user);
         Order order;
         if(!orderExist.isPresent()) {
             Timestamp time_created = new Timestamp(System.currentTimeMillis());
@@ -46,7 +46,7 @@ public class OrderService {
                     .order_status("Processing")
                     .user(user).build()
             );
-            order = findUserProcessingOrder(user.getId()).get();
+            order = findUserProcessingOrder(user).get();
         } else {
             order = orderExist.get();
         }
@@ -82,9 +82,27 @@ public class OrderService {
                 .findAny();
     }
 
-    public Optional<Order> findUserProcessingOrder(int user_id) {
-        return orderDao.getUserAllOrder(user_id).stream()
+    public Optional<Order> findUserProcessingOrder(User user) {
+        return orderDao.getUserAllOrder(user).stream()
                 .filter(order -> order.getOrder_status().equals("Processing"))
                 .findAny();
+    }
+
+    public List<Order> getUserAllOrders(User user) {
+        return orderDao.getUserAllOrder(user);
+    }
+
+    public Order getOrderById(int id) {
+        return orderDao.getOrderById(id);
+    }
+
+    public void submitOrder(int id) {
+        Order order = orderDao.getOrderById(id);
+        List<OrderItem> orderItemList = orderItemDao.getAllOrderItemsInSameOrder(order);
+        for(OrderItem item : orderItemList) {
+            Product product = productDao.getProductById(item.getProduct().getId());
+            product.setQuantity(product.getQuantity() - item.getQuantity());
+        }
+        order.setOrder_status("Completed");
     }
 }

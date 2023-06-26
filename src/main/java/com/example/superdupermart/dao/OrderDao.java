@@ -1,6 +1,7 @@
 package com.example.superdupermart.dao;
 
 import com.example.superdupermart.domain.Order;
+import com.example.superdupermart.domain.OrderItem;
 import com.example.superdupermart.domain.User;
 import org.hibernate.Session;
 import org.springframework.stereotype.Repository;
@@ -30,11 +31,14 @@ public class OrderDao extends AbstractHibernateDao<Order> {
         this.add(order);
     }
 
-    public List<Order> getUserAllOrder(int user_id) {
-        List<Order> orderList = this.getAll()
-                .stream()
-                .filter(order -> order.getUser().getId() == user_id)
-                .collect(Collectors.toList());
+    public List<Order> getUserAllOrder(User user) {
+        Session session = getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Order> criteria = builder.createQuery(Order.class);
+        Root<Order> root = criteria.from(Order.class);
+        criteria.select(root).where(builder.equal(root.get("user"), user));
+        Query query = session.createQuery(criteria);
+        List<Order> orderList = query.getResultList();
         return orderList;
     }
 }

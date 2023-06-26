@@ -42,7 +42,7 @@ public class ProductController {
         Product product = productService.getProductById(id);
         return DataResponse.builder()
                 .success(true)
-                .message("Success get all products")
+                .message("Successfully get all products")
                 .data(Product.builder()
                         .description(product.getDescription())
                         .name(product.getName())
