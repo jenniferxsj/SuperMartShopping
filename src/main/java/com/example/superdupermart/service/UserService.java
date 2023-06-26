@@ -62,7 +62,7 @@ public class UserService implements UserDetailsService {
         return userDao.loadUserByEmail(request.getEmail());
     }
 
-    public User getUserByUsername(UserCreationRequest request) {
-        return userDao.loadUserByUsername(request.getUsername());
+    public User getUserByUsername(String username) {
+        return userDao.loadUserByUsername(username);
     }
 }

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity //want to map it to the database table
-@Table(name="order")
+@Table(name="user_order")
 @Getter
 @Setter
 @ToString

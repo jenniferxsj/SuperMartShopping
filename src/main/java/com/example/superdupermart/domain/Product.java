@@ -1,5 +1,6 @@
 package com.example.superdupermart.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -38,4 +39,9 @@ public class Product {
     @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
     @ToString.Exclude
     private List<Watchlist> watchlistList = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<OrderItem> orderItemList = new ArrayList<>();
 }
