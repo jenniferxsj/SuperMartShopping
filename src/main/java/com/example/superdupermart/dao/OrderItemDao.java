@@ -41,7 +41,7 @@ public class OrderItemDao extends AbstractHibernateDao<OrderItem> {
         // set the root class
         Root<OrderItem> root = update.from(OrderItem.class);
         update.set("quantity", item.getQuantity());
-        update.where(builder.equal(root.get("item_id"), item.getId()));
+        update.where(builder.equal(root.get("id"), item.getId()));
         session.createQuery(update).executeUpdate();
     }
 }
