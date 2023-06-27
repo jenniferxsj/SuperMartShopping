@@ -36,7 +36,8 @@ public class Product {
     @Column(name = "wholesale_price")
     private double wholesale_price;
 
-    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
+    @JsonIgnore
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     @ToString.Exclude
     private List<Watchlist> watchlistList = new ArrayList<>();
 

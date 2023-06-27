@@ -4,13 +4,12 @@ import com.example.superdupermart.domain.Question;
 import com.example.superdupermart.dto.common.DataResponse;
 import com.example.superdupermart.dto.question.QuestionCreationRequest;
 import com.example.superdupermart.service.QuestionService;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-@Controller
+@RestController
 public class QuestionController {
     private final QuestionService questionService;
 
