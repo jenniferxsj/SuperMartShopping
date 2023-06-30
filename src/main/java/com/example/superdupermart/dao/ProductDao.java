@@ -23,5 +23,4 @@ public class ProductDao extends AbstractHibernateDao<Product> {
         return this.findById(id);
     }
 
-
 }

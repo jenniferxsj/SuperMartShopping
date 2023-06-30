@@ -32,4 +32,16 @@ public class ProductService {
         Product product = productDao.getProductById(id);
         return product;
     }
+
+    public void updateProduct(Product product) {
+        Product oldProduct = productDao.getProductById(product.getId());
+        oldProduct.setDescription(product.getDescription());
+        oldProduct.setQuantity(product.getQuantity());
+        oldProduct.setWholesale_price(product.getWholesale_price());
+        oldProduct.setRetail_price(product.getRetail_price());
+    }
+
+    public void createProduct(Product product) {
+        productDao.addProduct(product);
+    }
 }

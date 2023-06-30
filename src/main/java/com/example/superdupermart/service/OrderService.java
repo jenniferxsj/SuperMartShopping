@@ -3,6 +3,7 @@ package com.example.superdupermart.service;
 import com.example.superdupermart.dao.OrderDao;
 import com.example.superdupermart.dao.OrderItemDao;
 import com.example.superdupermart.dao.ProductDao;
+import com.example.superdupermart.dao.UserDao;
 import com.example.superdupermart.domain.Order;
 import com.example.superdupermart.domain.OrderItem;
 import com.example.superdupermart.domain.Product;
@@ -17,8 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -26,13 +26,15 @@ public class OrderService {
     private final OrderDao orderDao;
     private final OrderItemDao orderItemDao;
     private final ProductDao productDao;
+    private final UserDao userDao;
 
 
     @Autowired
-    public OrderService(OrderDao orderDao, OrderItemDao orderItemDao, ProductDao productDao) {
+    public OrderService(OrderDao orderDao, OrderItemDao orderItemDao, ProductDao productDao, UserDao userDao) {
         this.orderDao = orderDao;
         this.orderItemDao = orderItemDao;
         this.productDao = productDao;
+        this.userDao = userDao;
     }
 
     public void placeOrder(User user, CreateOrderRequest createOrderRequest) {
@@ -104,5 +106,18 @@ public class OrderService {
             product.setQuantity(product.getQuantity() - item.getQuantity());
         }
         order.setOrder_status("Completed");
+    }
+
+    public List<List<Object>> getAllOrders() {
+        List<Order> orderList = orderDao.getAllOrder();
+        Collections.sort(orderList, (o1, o2) -> o2.getDate_placed().compareTo(o1.getDate_placed()));
+        List<List<Object>> orderWithUser = new ArrayList<>();
+        for(Order order : orderList) {
+            List<Object> list = new ArrayList<>();
+            list.add(order);
+            list.add(order.getUser().getUsername());
+            orderWithUser.add(list);
+        }
+        return orderWithUser;
     }
 }
