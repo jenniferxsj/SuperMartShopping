@@ -21,11 +21,8 @@ public class ProductService {
         this.productDao = productDao;
     }
 
-    public List<Product> getAllStockProducts() {
-        List<Product> productList = productDao.getAllProducts().stream()
-                .filter(product -> product.getQuantity() > 0)
-                .collect(Collectors.toList());
-        return productList;
+    public List<Product> getAllProducts() {
+        return productDao.getAllProducts();
     }
 
     public Product getProductById(int id) {

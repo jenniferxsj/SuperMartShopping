@@ -30,7 +30,7 @@ public class User {
     @Column(name = "password", length = 60)
     @Length(min = 6, message = "Your password must have at least 5 characters")
     @NotEmpty(message = "Please provide your password")
-    private String passwordHash;
+    private String password;
 
     @Column(name = "role")
     private Integer role;

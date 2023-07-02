@@ -26,8 +26,9 @@ public class AuthUserDetail implements UserDetails {
         SimpleGrantedAuthority authority;
         if(role == 0) {
             list.add(new SimpleGrantedAuthority("ADMIN"));
+        } else {
+            list.add(new SimpleGrantedAuthority("USER"));
         }
-        list.add(new SimpleGrantedAuthority("USER"));
         return list;
     }
 

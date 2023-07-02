@@ -35,12 +35,13 @@ public class ProductController {
     }
 
     @GetMapping("/products/all")
-    public DataResponse getAllStockProducts() {
+    public DataResponse getAllProducts() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUserByUsername(auth.getName());
-        List<Product> productList = productService.getAllStockProducts();
+        List<Product> productList = productService.getAllProducts();
         if(user.getRole() == 0) {
             List<Product> productsUser = productList.stream()
+                    .filter(product -> product.getQuantity() > 0)
                     .map(product ->
                             Product.builder().description(product.getDescription())
                                     .name(product.getName())
@@ -116,4 +117,5 @@ public class ProductController {
                 ServiceStatus.builder().success(true).build()
         ).message("Successfully create product").build();
     }
+
 }

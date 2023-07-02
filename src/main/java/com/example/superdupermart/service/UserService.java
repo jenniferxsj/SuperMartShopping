@@ -32,7 +32,7 @@ public class UserService implements UserDetailsService {
 //        }
         return AuthUserDetail.builder() // spring security's userDetail
                 .username(user.getUsername())
-                .password(new BCryptPasswordEncoder().encode(user.getPasswordHash()))
+                .password(new BCryptPasswordEncoder().encode(user.getPassword()))
                 .role(user.getRole())
                 .accountNonExpired(true)
                 .accountNonLocked(true)
@@ -52,8 +52,8 @@ public class UserService implements UserDetailsService {
         }
         User user = User.builder()
                 .email(request.getEmail())
-                .passwordHash(request.getPassword())
-                .role(request.getRole())
+                .password(request.getPassword())
+                .role(0)
                 .username(request.getUsername()).build();
         userDao.addUser(user);
     }
