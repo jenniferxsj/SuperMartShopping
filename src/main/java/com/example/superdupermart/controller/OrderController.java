@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 public class OrderController {
     private final OrderService orderService;
@@ -30,6 +31,7 @@ public class OrderController {
 
     @PostMapping("/orders")
     public MessageResponse placeOrder(@RequestBody CreateOrderRequest createOrderRequest) {
+        System.out.println(createOrderRequest);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUserByUsername(auth.getName());
         orderService.placeOrder(user, createOrderRequest);
@@ -60,14 +62,5 @@ public class OrderController {
                 .message("Successfully get requested order info")
                 .data(order)
                 .build();
-    }
-
-    @PatchMapping("/orders/{id}/submit")
-    public MessageResponse submitOrder(@PathVariable int id) {
-        orderService.submitOrder(id);
-        return MessageResponse.builder()
-                .serviceStatus(
-                        ServiceStatus.builder().success(true).build()
-                ).message("Order submitted").build();
     }
 }

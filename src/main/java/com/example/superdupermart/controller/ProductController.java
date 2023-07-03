@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 public class ProductController {
     private final ProductService productService;
@@ -43,7 +44,9 @@ public class ProductController {
             List<Product> productsUser = productList.stream()
                     .filter(product -> product.getQuantity() > 0)
                     .map(product ->
-                            Product.builder().description(product.getDescription())
+                            Product.builder()
+                                    .id(product.getId())
+                                    .description(product.getDescription())
                                     .name(product.getName())
                                     .retail_price(product.getRetail_price())
                                     .build())

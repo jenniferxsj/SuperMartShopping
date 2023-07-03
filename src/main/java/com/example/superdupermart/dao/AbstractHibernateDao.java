@@ -33,8 +33,8 @@ public abstract class AbstractHibernateDao<T> {
         return getCurrentSession().get(clazz, id);
     }
 
-    public void add(T item) {
-        getCurrentSession().save(item);
+    public int add(T item) {
+        return (int)getCurrentSession().save(item);
     }
 
     protected Session getCurrentSession() {

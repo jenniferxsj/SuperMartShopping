@@ -27,8 +27,8 @@ public class OrderDao extends AbstractHibernateDao<Order> {
         return this.getAll();
     }
 
-    public void addOrder(Order order) {
-        this.add(order);
+    public int addOrder(Order order) {
+        return this.add(order);
     }
 
     public List<Order> getUserAllOrder(User user) {

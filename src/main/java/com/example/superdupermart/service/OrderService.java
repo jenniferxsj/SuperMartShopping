@@ -38,44 +38,28 @@ public class OrderService {
     }
 
     public void placeOrder(User user, CreateOrderRequest createOrderRequest) {
-        // check where there is incomplete order. If yes, use that; otherwise, create a new one
-        Optional<Order> orderExist = findUserProcessingOrder(user);
-        Order order;
-        if(!orderExist.isPresent()) {
-            Timestamp time_created = new Timestamp(System.currentTimeMillis());
-            orderDao.addOrder(Order.builder()
-                    .date_placed(time_created)
-                    .order_status("Processing")
-                    .user(user).build()
-            );
-            order = findUserProcessingOrder(user).get();
-        } else {
-            order = orderExist.get();
-        }
+        Timestamp time_created = new Timestamp(System.currentTimeMillis());
+        int order_id = orderDao.addOrder(Order.builder()
+                .date_placed(time_created)
+                .order_status("Processing")
+                .user(user).build()
+        );
+        Order order = orderDao.getOrderById(order_id);
 
         for(ProductRequest newOrder : createOrderRequest.getOrder()) {
             Product product = productDao.getProductById(newOrder.getProductId());
-            Optional<OrderItem> orderItem = getOrderItem(order, product);
-            if(orderItem.isPresent()) {
-                OrderItem item = orderItem.get();
-                int num = orderItem.get().getQuantity() + newOrder.getQuantity();
-                if(num > product.getQuantity())
-                    throw new NotEnoughInventoryException("Not enough this product in stock, sorry");
-                item.setQuantity(num);
-                orderItemDao.updateOrderItemQuantity(item);
-            } else {
-                int num = newOrder.getQuantity();
-                if (num > product.getQuantity())
-                    throw new NotEnoughInventoryException("Not enough this product in stock, sorry");
-
-                orderItemDao.addOrderItem(OrderItem.builder()
-                        .purchased_price(product.getRetail_price())
-                        .quantity(num)
-                        .wholesale_price(product.getWholesale_price())
-                        .order(order)
-                        .product(product)
-                        .build());
+            int num = newOrder.getQuantity();
+            if (num > product.getQuantity()) {
+                throw new NotEnoughInventoryException("Not enough this product in stock, sorry");
             }
+            product.setQuantity(product.getQuantity() - num);
+            orderItemDao.addOrderItem(OrderItem.builder()
+                    .purchased_price(product.getRetail_price())
+                    .quantity(num)
+                    .wholesale_price(product.getWholesale_price())
+                    .order(order)
+                    .product(product)
+                    .build());
         }
     }
     public Optional<OrderItem> getOrderItem(Order order, Product product) {
