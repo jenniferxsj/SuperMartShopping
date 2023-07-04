@@ -11,6 +11,7 @@ import com.example.superdupermart.domain.User;
 import com.example.superdupermart.dto.order.CreateOrderRequest;
 import com.example.superdupermart.dto.product.ProductRequest;
 import com.example.superdupermart.exception.NotEnoughInventoryException;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -75,11 +77,18 @@ public class OrderService {
     }
 
     public List<Order> getUserAllOrders(User user) {
-        return orderDao.getUserAllOrder(user);
+        return orderDao.getUserAllOrder(user).stream().sorted(new Comparator<Order>() {
+            @Override
+            public int compare(Order o1, Order o2) {
+                return o1.getDate_placed().compareTo(o2.getDate_placed());
+            }
+        }).collect(Collectors.toList());
     }
 
     public Order getOrderById(int id) {
-        return orderDao.getOrderById(id);
+        Order order = orderDao.getOrderById(id);
+
+        return order;
     }
 
     public void submitOrder(int id) {
@@ -94,7 +103,6 @@ public class OrderService {
 
     public List<List<Object>> getAllOrders() {
         List<Order> orderList = orderDao.getAllOrder();
-        Collections.sort(orderList, (o1, o2) -> o2.getDate_placed().compareTo(o1.getDate_placed()));
         List<List<Object>> orderWithUser = new ArrayList<>();
         for(Order order : orderList) {
             List<Object> list = new ArrayList<>();
@@ -103,5 +111,21 @@ public class OrderService {
             orderWithUser.add(list);
         }
         return orderWithUser;
+    }
+
+    public int cancelOrder(int id) {
+        Order order = getOrderById(id);
+        if(order.getOrder_status().equals("Completed")) {
+            return 0;
+        } else if(order.getOrder_status().equals("Canceled")) {
+            return 2;
+        }
+        order.getOrderItemList().forEach(item -> {
+            Product product = item.getProduct();
+            int quantity = product.getQuantity();
+            product.setQuantity(quantity + item.getQuantity());
+        });
+        order.setOrder_status("Canceled");
+        return 1;
     }
 }

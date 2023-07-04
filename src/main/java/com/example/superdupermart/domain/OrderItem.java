@@ -1,5 +1,6 @@
 package com.example.superdupermart.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
@@ -27,6 +28,7 @@ public class OrderItem {
     @Column(name = "wholesale_price")
     private double wholesale_price;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;

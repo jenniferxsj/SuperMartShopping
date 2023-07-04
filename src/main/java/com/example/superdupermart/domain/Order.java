@@ -33,8 +33,7 @@ public class Order {
     @JoinColumn(name = "user_id", nullable = false) //name should be the same with the column in database table
     private User user;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<OrderItem> orderItemList = new ArrayList<>();
 
 }

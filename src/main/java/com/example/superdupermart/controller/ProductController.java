@@ -79,6 +79,7 @@ public class ProductController {
                     .success(true)
                     .message("Successfully get all products")
                     .data(Product.builder()
+                            .id(product.getId())
                             .description(product.getDescription())
                             .name(product.getName())
                             .retail_price(product.getRetail_price())
