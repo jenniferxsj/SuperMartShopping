@@ -62,6 +62,7 @@ public class LoginController {
 
     @PostMapping("/signup")
     public MessageResponse createUser(@RequestBody UserCreationRequest request) {
+
         userService.addUser(request);
         return MessageResponse.builder()
                 .serviceStatus(

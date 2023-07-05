@@ -13,13 +13,9 @@ import com.example.superdupermart.dto.product.ProductDTO;
 import com.example.superdupermart.dto.product.ProductRequest;
 import com.example.superdupermart.exception.NoSuchOrderException;
 import com.example.superdupermart.exception.NotEnoughInventoryException;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -163,9 +159,7 @@ public class OrderService {
                     } else {
                         return p1.getKey().getId().compareTo(p2.getKey().getId()); // If frequencies are equal, sort by product ID
                     }
-                })
-                .limit(count)
-                .map(entry -> {
+                }).limit(count).map(entry -> {
                     Product product = entry.getKey();
                     ProductDTO productDTO = ProductDTO.builder().id(product.getId())
                             .description(product.getDescription())
@@ -202,6 +196,27 @@ public class OrderService {
         return productDTOList;
     }
 
+    public List<ProductDTO> getPopularProducts(int count) {
+        List<Order> orderList = this.orderDao.getAllOrder();
+        List<ProductDTO> topProducts = orderList.stream()
+                .flatMap(order -> order.getOrderItemList().stream())
+                .collect(Collectors.groupingBy(
+                        OrderItem::getProduct,
+                        Collectors.summingInt(OrderItem::getQuantity)))
+                .entrySet().stream()
+                .sorted(Map.Entry.<Product, Integer>comparingByValue().reversed())
+                .limit(3)
+                .map(entry -> {
+                    Product product = entry.getKey();
+                    return ProductDTO.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .description(product.getDescription()).build();
+                })
+                .collect(Collectors.toList());
+        return topProducts;
+    }
+
     public List<ProductDTO> getProfitProducts(int count) {
         List<Order> orderList = this.orderDao.getAllOrder().stream()
                 .filter(order -> order.getOrder_status().equals("Completed"))
@@ -216,27 +231,6 @@ public class OrderService {
                 .entrySet().stream()
                 .sorted(Map.Entry.<Product, Double>comparingByValue().reversed())
                 .limit(count)
-                .map(entry -> {
-                    Product product = entry.getKey();
-                    return ProductDTO.builder()
-                            .id(product.getId())
-                            .name(product.getName())
-                            .description(product.getDescription()).build();
-                })
-                .collect(Collectors.toList());
-        return topProducts;
-    }
-
-    public List<ProductDTO> getPopularProducts(int count) {
-        List<Order> orderList = this.orderDao.getAllOrder();
-        List<ProductDTO> topProducts = orderList.stream()
-                .flatMap(order -> order.getOrderItemList().stream())
-                .collect(Collectors.groupingBy(
-                        OrderItem::getProduct,
-                        Collectors.summingInt(OrderItem::getQuantity)))
-                .entrySet().stream()
-                .sorted(Map.Entry.<Product, Integer>comparingByValue().reversed())
-                .limit(3)
                 .map(entry -> {
                     Product product = entry.getKey();
                     return ProductDTO.builder()
@@ -263,5 +257,8 @@ public class OrderService {
         }
         return count;
     }
-    
+
+    public List<Order> getAllOrdersPageable(int pageNumber, int pageSize) {
+        return orderDao.getAllOrderPageable(pageNumber, pageSize);
+    }
 }

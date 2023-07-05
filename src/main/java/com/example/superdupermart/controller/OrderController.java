@@ -51,14 +51,13 @@ public class OrderController {
     }
 
     @GetMapping("/orders/all")
-    public AllOrderResponse getUserAllOrders(@RequestParam(defaultValue = "0") Integer pageNumber,
-                                             @RequestParam(defaultValue = "10") Integer pageSize) {
+    public AllOrderResponse getUserAllOrders() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUserByUsername(auth.getName());
         boolean isAdmin = user.getRole() == 1;
 
         List<Order> orderList = isAdmin ? orderService.getAllOrder() :  orderService.getUserAllOrders(user);
-        Collections.sort(orderList, (o1, o2) -> o2.getDate_placed().compareTo(o1.getDate_placed()));
+        orderList.sort((o1, o2) -> o2.getDate_placed().compareTo(o1.getDate_placed()));
         List<OrderDTO> orderDTOS = orderList.stream().map(
                 order -> OrderDTO.builder().id(order.getId())
                             .date_placed(order.getDate_placed())
