@@ -71,6 +71,7 @@ public class OrderController {
                         .quantity(item.getQuantity()).purchased_price(item.getPurchased_price())
                         .productDTO(ProductDTO.builder().id(item.getProduct().getId())
                                 .name(item.getProduct().getName())
+                                .description(item.getProduct().getDescription())
                                 .build())
                         .build())
                 .collect(Collectors.toList());
@@ -105,6 +106,30 @@ public class OrderController {
                 .serviceStatus(
                         ServiceStatus.builder().success(true).build()
                 ).message("Successfully cancel order").build();
+    }
+
+    @GetMapping("/products/frequent/{count}")
+    public DataResponse frequentProducts(@PathVariable int count) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.getUserByUsername(auth.getName());
+        List<ProductDTO> productDTOList = this.orderService.getFrequentProducts(count, user);
+        return DataResponse.builder()
+                .success(true)
+                .message("Successfully get requested products info")
+                .data(productDTOList)
+                .build();
+    }
+
+    @GetMapping("/products/recent/{count}")
+    public DataResponse recentProducts(@PathVariable int count) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.getUserByUsername(auth.getName());
+        List<ProductDTO> productDTOList = this.orderService.getRecentProducts(count, user);
+        return DataResponse.builder()
+                .success(true)
+                .message("Successfully get requested products info")
+                .data(productDTOList)
+                .build();
     }
 
 }

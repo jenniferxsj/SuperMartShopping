@@ -10,4 +10,5 @@ import lombok.Setter;
 public class ProductDTO {
     int id;
     String name;
+    String description;
 }

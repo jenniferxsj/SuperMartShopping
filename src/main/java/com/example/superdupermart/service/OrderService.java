@@ -9,6 +9,7 @@ import com.example.superdupermart.domain.OrderItem;
 import com.example.superdupermart.domain.Product;
 import com.example.superdupermart.domain.User;
 import com.example.superdupermart.dto.order.CreateOrderRequest;
+import com.example.superdupermart.dto.product.ProductDTO;
 import com.example.superdupermart.dto.product.ProductRequest;
 import com.example.superdupermart.exception.NotEnoughInventoryException;
 import org.hibernate.Hibernate;
@@ -127,5 +128,59 @@ public class OrderService {
         });
         order.setOrder_status("Canceled");
         return 1;
+    }
+
+    public List<ProductDTO> getFrequentProducts(int count, User user) {
+        List<Order> orderList = getUserAllOrders(user).stream()
+                .filter(order -> !order.getOrder_status().equals("Canceled"))
+                .collect(Collectors.toList());
+        Map<Product, Long> productFrequency = orderList.stream()
+                .flatMap(order -> order.getOrderItemList().stream())
+                .collect(Collectors.groupingBy(OrderItem::getProduct, Collectors.counting()));
+        List<ProductDTO> res = productFrequency.entrySet().stream()
+                .sorted((p1, p2) -> {
+                    int compareFrequency = p2.getValue().compareTo(p1.getValue());
+                    if (compareFrequency != 0) {
+                        return compareFrequency; // If frequencies are different, sort by frequency
+                    } else {
+                        return p1.getKey().getId().compareTo(p2.getKey().getId()); // If frequencies are equal, sort by product ID
+                    }
+                })
+                .limit(count)
+                .map(entry -> {
+                    Product product = entry.getKey();
+                    ProductDTO productDTO = ProductDTO.builder().id(product.getId())
+                            .description(product.getDescription())
+                            .name(product.getName()).build();
+                    return productDTO;
+                }).collect(Collectors.toList());
+        return res;
+    }
+
+    public List<ProductDTO> getRecentProducts(int count, User user) {
+        List<OrderItem> orderItemList = getUserAllOrders(user).stream()
+                .filter(order -> !order.getOrder_status().equals("Canceled"))
+                .flatMap(order -> order.getOrderItemList().stream())
+                .sorted((item1, item2) -> item2.getOrder().getDate_placed().compareTo(item1.getOrder().getDate_placed()))
+                .collect(Collectors.toList());
+
+        List<Product> productList = new ArrayList<>();
+        for(OrderItem item : orderItemList) {
+            Product product = item.getProduct();
+            if (!productList.contains(product)) {  // check if the product is already in the list
+                productList.add(product);
+            }
+            if (productList.size() == count) {  // stop when we have 3 unique products
+                break;
+            }
+        }
+
+        List<ProductDTO> productDTOList = new ArrayList<>();
+        for(Product product : productList) {
+            productDTOList.add(ProductDTO.builder().id(product.getId())
+                    .name(product.getName())
+                    .description(product.getDescription()).build());
+        }
+        return productDTOList;
     }
 }
