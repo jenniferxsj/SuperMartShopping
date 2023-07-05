@@ -57,15 +57,11 @@ public class ProductController {
                     .data(productsUser)
                     .build();
         }
-        // [Order, username]
-        List<List<Object>> orderList = orderService.getAllOrders();
-        List<List<Object>> lists = new ArrayList<>();
-        lists.add(Collections.singletonList(productList));
-        lists.add(Collections.singletonList(orderList));
+        List<Product> products = productService.getAllProducts();
         return DataResponse.builder()
                 .success(true)
-                .message("Success get all products and orders")
-                .data(lists)
+                .message("Success get all products")
+                .data(products)
                 .build();
     }
 
@@ -100,8 +96,8 @@ public class ProductController {
                 .description(request.getDescription())
                 .name(request.getName())
                 .quantity(request.getQuantity())
-                .retail_price(request.getRetailPrice())
-                .wholesale_price(request.getWholesalePrice()).build();
+                .retail_price(request.getRetail_price())
+                .wholesale_price(request.getWholesale_price()).build();
         productService.updateProduct(product);
         return MessageResponse.builder().serviceStatus(
                 ServiceStatus.builder().success(true).build()
@@ -114,8 +110,8 @@ public class ProductController {
                 .description(request.getDescription())
                 .name(request.getName())
                 .quantity(request.getQuantity())
-                .retail_price(request.getRetailPrice())
-                .wholesale_price(request.getWholesalePrice()).build();
+                .retail_price(request.getRetail_price())
+                .wholesale_price(request.getWholesale_price()).build();
         productService.createProduct(product);
         return MessageResponse.builder().serviceStatus(
                 ServiceStatus.builder().success(true).build()

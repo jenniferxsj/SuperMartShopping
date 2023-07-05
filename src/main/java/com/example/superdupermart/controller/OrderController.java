@@ -12,17 +12,19 @@ import com.example.superdupermart.dto.order.OrderDTO;
 import com.example.superdupermart.dto.orderItem.OrderItemDTO;
 import com.example.superdupermart.dto.product.ProductDTO;
 import com.example.superdupermart.dto.product.ProductRequest;
+import com.example.superdupermart.exception.NoAuthException;
 import com.example.superdupermart.service.OrderService;
 import com.example.superdupermart.service.UserService;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -39,7 +41,6 @@ public class OrderController {
 
     @PostMapping("/orders")
     public MessageResponse placeOrder(@RequestBody CreateOrderRequest createOrderRequest) {
-        System.out.println(createOrderRequest);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUserByUsername(auth.getName());
         orderService.placeOrder(user, createOrderRequest);
@@ -50,26 +51,52 @@ public class OrderController {
     }
 
     @GetMapping("/orders/all")
-    public AllOrderResponse getUserAllOrders() {
+    public AllOrderResponse getUserAllOrders(@RequestParam(defaultValue = "0") Integer pageNumber,
+                                             @RequestParam(defaultValue = "10") Integer pageSize) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUserByUsername(auth.getName());
-        List<Order> orderList = orderService.getUserAllOrders(user);
+        boolean isAdmin = user.getRole() == 1;
+
+        List<Order> orderList = isAdmin ? orderService.getAllOrder() :  orderService.getUserAllOrders(user);
         Collections.sort(orderList, (o1, o2) -> o2.getDate_placed().compareTo(o1.getDate_placed()));
+        List<OrderDTO> orderDTOS = orderList.stream().map(
+                order -> OrderDTO.builder().id(order.getId())
+                            .date_placed(order.getDate_placed())
+                            .username(order.getUser().getUsername())
+                        .order_status(order.getOrder_status())
+                            .orderItemDTOList(order.getOrderItemList().stream().map(
+                                    orderItem -> OrderItemDTO.builder().id(orderItem.getId())
+                                            .purchased_price(orderItem.getPurchased_price())
+                                            .wholesale_price(isAdmin ? orderItem.getWholesale_price() : 0)
+                                            .quantity(orderItem.getQuantity())
+                                            .productDTO(ProductDTO.builder()
+                                                    .id(orderItem.getProduct().getId())
+                                                    .name(orderItem.getProduct().getName())
+                                                    .description(orderItem.getProduct().getDescription())
+                                                    .build()).build()
+                            ).collect(Collectors.toList())).build()
+        ).collect(Collectors.toList());
         return AllOrderResponse.builder()
                 .serviceStatus(ServiceStatus.builder()
                         .success(true)
                         .message("successfully get all orders")
                         .build())
-                .orders(orderList).build();
+                .orders(orderDTOS).build();
     }
 
     @GetMapping("/orders/{id}")
     public DataResponse getOneOrder(@PathVariable int id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.getUserByUsername(auth.getName());
+        boolean isAdmin = user.getRole() == 1;
         Order order = orderService.getOrderById(id);
         List<OrderItemDTO> orderItemList = order.getOrderItemList().stream()
                 .map(item -> OrderItemDTO.builder().id(item.getId())
-                        .quantity(item.getQuantity()).purchased_price(item.getPurchased_price())
-                        .productDTO(ProductDTO.builder().id(item.getProduct().getId())
+                        .quantity(item.getQuantity())
+                        .purchased_price(item.getPurchased_price())
+                        .wholesale_price(isAdmin ? item.getWholesale_price() : 0)
+                        .productDTO(ProductDTO.builder()
+                                .id(item.getProduct().getId())
                                 .name(item.getProduct().getName())
                                 .description(item.getProduct().getDescription())
                                 .build())
@@ -77,6 +104,7 @@ public class OrderController {
                 .collect(Collectors.toList());
 
         OrderDTO orderDTO = OrderDTO.builder().id(order.getId())
+                .username(order.getUser().getUsername())
                 .date_placed(order.getDate_placed())
                 .order_status(order.getOrder_status())
                 .orderItemDTOList(orderItemList).build();
@@ -108,6 +136,23 @@ public class OrderController {
                 ).message("Successfully cancel order").build();
     }
 
+    @PatchMapping("/orders/{id}/complete")
+    public MessageResponse completeOrder(@PathVariable int id) {
+        int result = this.orderService.completeOrder(id);
+        String msg = "";
+        if(result == 0) {
+            msg = "This is a complete order";
+        } else if(result == 2) {
+            msg = "Order is canceled, cannot complete";
+        } else{
+            msg = "Successfully complete order";
+        }
+        return MessageResponse.builder()
+                .serviceStatus(
+                        ServiceStatus.builder().success(true).build()
+                ).message(msg).build();
+    }
+
     @GetMapping("/products/frequent/{count}")
     public DataResponse frequentProducts(@PathVariable int count) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -129,6 +174,45 @@ public class OrderController {
                 .success(true)
                 .message("Successfully get requested products info")
                 .data(productDTOList)
+                .build();
+    }
+
+    @GetMapping("/products/profit/{count}")
+    public DataResponse profitProducts(@PathVariable int count) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.getUserByUsername(auth.getName());
+        if(user.getRole() == 0) throw new NoAuthException("You don't have permission");
+        List<ProductDTO> topProducts = orderService.getProfitProducts(count);
+        // HashMap<ProductDTO, Double> topProducts = orderService.getProfitProducts(count);
+
+        return DataResponse.builder()
+                .success(true)
+                .message("Successfully get requested products info")
+                .data(topProducts)
+                .build();
+    }
+
+    @GetMapping("/products/popular/{count}")
+    public DataResponse popularProducts(@PathVariable int count) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.getUserByUsername(auth.getName());
+        if(user.getRole() == 0) throw new NoAuthException("You don't have permission");
+        List<ProductDTO> topProducts = orderService.getPopularProducts(count);
+
+        return DataResponse.builder()
+                .success(true)
+                .message("Successfully get requested products info")
+                .data(topProducts)
+                .build();
+    }
+
+    @GetMapping("products/{id}/sold")
+    public DataResponse calculateSold(@PathVariable int id) {
+        int count = this.orderService.getTotalSole(id);
+        return DataResponse.builder()
+                .success(true)
+                .message("Successfully get requested products info")
+                .data(count)
                 .build();
     }
 

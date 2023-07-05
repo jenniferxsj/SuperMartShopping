@@ -23,8 +23,7 @@ public class AuthUserDetail implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> list = new ArrayList<>();
-        SimpleGrantedAuthority authority;
-        if(role == 0) {
+        if(role == 1) {
             list.add(new SimpleGrantedAuthority("ADMIN"));
         } else {
             list.add(new SimpleGrantedAuthority("USER"));

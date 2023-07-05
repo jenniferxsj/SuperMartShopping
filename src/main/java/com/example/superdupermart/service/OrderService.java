@@ -11,6 +11,7 @@ import com.example.superdupermart.domain.User;
 import com.example.superdupermart.dto.order.CreateOrderRequest;
 import com.example.superdupermart.dto.product.ProductDTO;
 import com.example.superdupermart.dto.product.ProductRequest;
+import com.example.superdupermart.exception.NoSuchOrderException;
 import com.example.superdupermart.exception.NotEnoughInventoryException;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,12 +79,7 @@ public class OrderService {
     }
 
     public List<Order> getUserAllOrders(User user) {
-        return orderDao.getUserAllOrder(user).stream().sorted(new Comparator<Order>() {
-            @Override
-            public int compare(Order o1, Order o2) {
-                return o1.getDate_placed().compareTo(o2.getDate_placed());
-            }
-        }).collect(Collectors.toList());
+        return orderDao.getUserAllOrder(user);
     }
 
     public Order getOrderById(int id) {
@@ -102,7 +98,7 @@ public class OrderService {
         order.setOrder_status("Completed");
     }
 
-    public List<List<Object>> getAllOrders() {
+    public List<List<Object>> getAllOrders2() {
         List<Order> orderList = orderDao.getAllOrder();
         List<List<Object>> orderWithUser = new ArrayList<>();
         for(Order order : orderList) {
@@ -114,8 +110,16 @@ public class OrderService {
         return orderWithUser;
     }
 
+    public List<Order> getAllOrder() {
+        List<Order> orderList = orderDao.getAllOrder();
+        return orderList;
+    }
+
     public int cancelOrder(int id) {
         Order order = getOrderById(id);
+        if(order == null) {
+            throw new NoSuchOrderException("The order does not exist");
+        }
         if(order.getOrder_status().equals("Completed")) {
             return 0;
         } else if(order.getOrder_status().equals("Canceled")) {
@@ -127,6 +131,20 @@ public class OrderService {
             product.setQuantity(quantity + item.getQuantity());
         });
         order.setOrder_status("Canceled");
+        return 1;
+    }
+
+    public int completeOrder(int id) {
+        Order order = getOrderById(id);
+        if(order == null) {
+            throw new NoSuchOrderException("The order does not exist");
+        }
+        if(order.getOrder_status().equals("Completed")) {
+            return 0;
+        } else if(order.getOrder_status().equals("Canceled")) {
+            return 2;
+        }
+        order.setOrder_status("Completed");
         return 1;
     }
 
@@ -183,4 +201,67 @@ public class OrderService {
         }
         return productDTOList;
     }
+
+    public List<ProductDTO> getProfitProducts(int count) {
+        List<Order> orderList = this.orderDao.getAllOrder().stream()
+                .filter(order -> order.getOrder_status().equals("Completed"))
+                .collect(Collectors.toList());
+        List<ProductDTO> topProducts = orderList.stream()
+                .flatMap(order -> order.getOrderItemList().stream())
+                .map(orderItem -> new AbstractMap.SimpleEntry<>(
+                        orderItem.getProduct(),
+                        (orderItem.getProduct().getRetail_price() - orderItem.getProduct().getWholesale_price()) * orderItem.getQuantity())
+                )
+                .collect(Collectors.groupingBy(AbstractMap.SimpleEntry::getKey, Collectors.summingDouble(AbstractMap.SimpleEntry::getValue)))
+                .entrySet().stream()
+                .sorted(Map.Entry.<Product, Double>comparingByValue().reversed())
+                .limit(count)
+                .map(entry -> {
+                    Product product = entry.getKey();
+                    return ProductDTO.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .description(product.getDescription()).build();
+                })
+                .collect(Collectors.toList());
+        return topProducts;
+    }
+
+    public List<ProductDTO> getPopularProducts(int count) {
+        List<Order> orderList = this.orderDao.getAllOrder();
+        List<ProductDTO> topProducts = orderList.stream()
+                .flatMap(order -> order.getOrderItemList().stream())
+                .collect(Collectors.groupingBy(
+                        OrderItem::getProduct,
+                        Collectors.summingInt(OrderItem::getQuantity)))
+                .entrySet().stream()
+                .sorted(Map.Entry.<Product, Integer>comparingByValue().reversed())
+                .limit(3)
+                .map(entry -> {
+                    Product product = entry.getKey();
+                    return ProductDTO.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .description(product.getDescription()).build();
+                })
+                .collect(Collectors.toList());
+        return topProducts;
+    }
+
+    public int getTotalSole(int id) {
+        Product product = this.productDao.getProductById(id);
+        System.out.println(product);
+        System.out.println("id:"+ id);
+        int count = 0;
+        List<OrderItem> orderList = this.orderDao.getAllOrder().stream()
+                .filter(order -> order.getOrder_status().equals("Completed"))
+                .flatMap(order -> order.getOrderItemList().stream())
+                .filter(item -> item.getProduct().getId() == product.getId())
+                .collect(Collectors.toList());
+        for(OrderItem orderItem: orderList) {
+            count += orderItem.getQuantity();
+        }
+        return count;
+    }
+    
 }

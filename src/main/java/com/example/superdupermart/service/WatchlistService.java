@@ -5,6 +5,7 @@ import com.example.superdupermart.dao.WatchlistDao;
 import com.example.superdupermart.domain.Product;
 import com.example.superdupermart.domain.User;
 import com.example.superdupermart.domain.Watchlist;
+import com.example.superdupermart.dto.product.ProductDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,9 +40,14 @@ public class WatchlistService {
         return 0;
     }
 
-    public List<Watchlist> getUserWatchlist(User user) {
+    public List<ProductDTO> getUserWatchlist(User user) {
         return watchlistDao.getUserAllWatchlist(user).stream()
                 .filter(watchlist -> watchlist.getProduct().getQuantity() > 0)
+                .map(watchlist -> ProductDTO.builder()
+                        .id(watchlist.getProduct().getId())
+                        .name(watchlist.getProduct().getName())
+                        .description(watchlist.getProduct().getDescription())
+                        .build())
                 .collect(Collectors.toList());
     }
 

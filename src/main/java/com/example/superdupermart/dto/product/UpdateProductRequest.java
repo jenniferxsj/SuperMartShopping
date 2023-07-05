@@ -10,7 +10,7 @@ import lombok.ToString;
 public class UpdateProductRequest {
     private String description;
     private int quantity;
-    private int retailPrice;
-    private int wholesalePrice;
+    private int retail_price;
+    private int wholesale_price;
     private String name;
 }

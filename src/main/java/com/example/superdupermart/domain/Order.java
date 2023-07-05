@@ -28,8 +28,7 @@ public class Order {
     @Column(name = "order_status")
     private String order_status;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false) //name should be the same with the column in database table
     private User user;
 

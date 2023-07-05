@@ -1,15 +1,14 @@
 package com.example.superdupermart.config;
 
 import com.example.superdupermart.dto.common.ErrorResponse;
-import com.example.superdupermart.exception.InvalidCredentialsException;
-import com.example.superdupermart.exception.NoSuchUserExistsException;
-import com.example.superdupermart.exception.NotEnoughInventoryException;
-import com.example.superdupermart.exception.UserAlreadyExistException;
+import com.example.superdupermart.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -36,5 +35,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ErrorResponse.builder().statusCode(HttpStatus.BAD_REQUEST.value())
                 .message(ex.getMessage()).build(), HttpStatus.OK);
     }
+    @ExceptionHandler(value = {NoSuchOrderException.class})
+    public ResponseEntity<ErrorResponse> noSuchOrderException(NoSuchOrderException ex) {
+        return new ResponseEntity<>(ErrorResponse.builder().statusCode(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage()).build(), HttpStatus.OK);
+    }
 
+    @ExceptionHandler(value = {NoAuthException.class})
+    public ResponseEntity<ErrorResponse> noAuthException(NoAuthException ex) {
+        return new ResponseEntity<>(ErrorResponse.builder().statusCode(HttpStatus.UNAUTHORIZED.value())
+                .message(ex.getMessage()).build(), HttpStatus.OK);
+    }
 }

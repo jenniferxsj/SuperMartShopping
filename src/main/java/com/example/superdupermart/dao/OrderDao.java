@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -25,6 +26,21 @@ public class OrderDao extends AbstractHibernateDao<Order> {
 
     public List<Order> getAllOrder() {
         return this.getAll();
+    }
+
+    public List<Order> getAllOrderPageable(int pageNumber, int pageSize) {
+        Session session = getCurrentSession();
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Order> criteria = builder.createQuery(Order.class);
+        Root<Order> root = criteria.from(Order.class);
+        CriteriaQuery<Order> all = criteria.select(root);
+        TypedQuery<Order> orderTypedQuery = session.createQuery(all);
+        TypedQuery<Order> allQuery = session.createQuery(all);
+
+        allQuery.setFirstResult((pageNumber - 1) * pageSize);
+        allQuery.setMaxResults(pageSize);
+
+        return allQuery.getResultList();
     }
 
     public int addOrder(Order order) {

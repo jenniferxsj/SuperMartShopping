@@ -15,5 +15,6 @@ public class OrderDTO {
     int id;
     Timestamp date_placed;
     String order_status;
+    String username;
     List<OrderItemDTO> orderItemDTOList;
 }

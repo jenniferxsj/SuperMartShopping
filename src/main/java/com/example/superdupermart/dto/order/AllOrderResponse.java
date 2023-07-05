@@ -13,5 +13,5 @@ import java.util.List;
 @Builder
 public class AllOrderResponse {
     ServiceStatus serviceStatus;
-    List<Order> orders;
+    List<OrderDTO> orders;
 }

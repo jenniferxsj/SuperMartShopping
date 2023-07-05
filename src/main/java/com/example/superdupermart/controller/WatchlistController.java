@@ -43,6 +43,7 @@ public class WatchlistController {
     public DataResponse getUserAllWatchList() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.getUserByUsername(auth.getName());
+
         return DataResponse.builder()
                 .success(true)
                 .message("Successfully get user watchlist")

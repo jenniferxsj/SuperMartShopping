@@ -11,6 +11,7 @@ import lombok.Setter;
 public class OrderItemDTO {
     int id;
     double purchased_price;
+    double wholesale_price;
     int quantity;
     ProductDTO productDTO;
 }
